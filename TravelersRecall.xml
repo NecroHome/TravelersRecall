@@ -1,0 +1,193 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+    <Frame name="TravelersRecallFrame"
+           parent="UIParent"
+           hidden="true"
+           movable="true"
+           enableMouse="true"
+           frameStrata="DIALOG">
+
+        <Size>
+            <AbsDimension x="290" y="520"/>
+        </Size>
+
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+
+        <!-- BACKDROP -->
+
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
+                  edgeFile="Interface\DialogFrame\UI-DialogBox-Border"
+                  tile="true">
+
+            <BackgroundInsets>
+                <AbsInset left="11" right="12" top="12" bottom="11"/>
+            </BackgroundInsets>
+
+            <TileSize>
+                <AbsValue val="32"/>
+            </TileSize>
+
+            <EdgeSize>
+                <AbsValue val="32"/>
+            </EdgeSize>
+
+        </Backdrop>
+
+        <!-- HEADER -->
+
+        <Layers>
+
+            <Layer level="ARTWORK">
+
+                <Texture name="$parentHeader"
+                         file="Interface\DialogFrame\UI-DialogBox-Header">
+
+                    <Size>
+                        <AbsDimension x="256" y="64"/>
+                    </Size>
+
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset>
+                                <AbsDimension x="0" y="12"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+
+                </Texture>
+
+            </Layer>
+
+        </Layers>
+
+        <!-- FRAMES -->
+
+        <Frames>
+
+            <!-- SCROLL FRAME -->
+
+            <ScrollFrame name="TravelersRecallScrollFrame"
+                         enableMouseWheel="true">
+
+                <Size>
+                    <AbsDimension x="220" y="420"/>
+                </Size>
+
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="20" y="-40"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+
+            </ScrollFrame>
+
+            <!-- SCROLLBAR -->
+
+            <Slider name="TravelersRecallScrollBar"
+                    inherits="UIPanelScrollBarTemplate"
+                    orientation="VERTICAL">
+
+                <Size>
+                    <AbsDimension x="16" y="420"/>
+                </Size>
+
+                <Anchors>
+
+                    <Anchor point="TOPLEFT"
+                            relativeTo="TravelersRecallScrollFrame"
+                            relativePoint="TOPRIGHT">
+
+                        <Offset>
+                            <AbsDimension x="4" y="0"/>
+                        </Offset>
+
+                    </Anchor>
+
+                </Anchors>
+
+                <MinMaxValues>
+                    <AbsValue val="0"/>
+                    <AbsValue val="0"/>
+                </MinMaxValues>
+
+                <ValueStep>
+                    <AbsValue val="1"/>
+                </ValueStep>
+
+            </Slider>
+
+        </Frames>
+
+        <!-- SCRIPTS -->
+
+        <Scripts>
+
+            <OnLoad>
+
+                this:RegisterForDrag("LeftButton");
+
+                --------------------------------------------------
+                -- TITLE
+                --------------------------------------------------
+
+                local title = this:CreateFontString(
+                    nil,
+                    "OVERLAY",
+                    "GameFontNormal"
+                )
+
+                title:SetPoint("TOP", 0, -2)
+
+                title:SetText("Traveler's Recall")
+
+                title:SetTextColor(1, 0.82, 0)
+
+                --------------------------------------------------
+                -- CLOSE BUTTON
+                --------------------------------------------------
+
+                local closeButton = CreateFrame(
+                    "Button",
+                    nil,
+                    this,
+                    "UIPanelButtonTemplate"
+                )
+
+                closeButton:SetWidth(90)
+                closeButton:SetHeight(22)
+
+                closeButton:SetPoint(
+                    "BOTTOMRIGHT",
+                    this,
+                    "BOTTOMRIGHT",
+                    -16,
+                    16
+                )
+
+                closeButton:SetText("Close")
+
+                closeButton:SetScript("OnClick", function()
+
+                    TravelersRecallFrame:Hide()
+
+                end)
+
+            </OnLoad>
+
+            <OnDragStart>
+                this:StartMoving();
+            </OnDragStart>
+
+            <OnDragStop>
+                this:StopMovingOrSizing();
+            </OnDragStop>
+
+        </Scripts>
+
+    </Frame>
+
+</Ui>

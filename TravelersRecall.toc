@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: Traveler's Recall
+## Notes: Fast travel system
+## Author: NecroHome
+## Version: 1.0
+
+TravelersRecall.xml
+TravelersRecall.lua
