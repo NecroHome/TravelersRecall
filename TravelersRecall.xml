@@ -65,14 +65,14 @@
         <!-- FRAMES -->
 
         <Frames>
-
+            
             <!-- SCROLL FRAME -->
 
             <ScrollFrame name="TravelersRecallScrollFrame"
                          enableMouseWheel="true">
 
                 <Size>
-                    <AbsDimension x="220" y="420"/>
+                    <AbsDimension x="220" y="370"/>
                 </Size>
 
                 <Anchors>
@@ -92,7 +92,7 @@
                     orientation="VERTICAL">
 
                 <Size>
-                    <AbsDimension x="16" y="420"/>
+                    <AbsDimension x="16" y="370"/>
                 </Size>
 
                 <Anchors>
@@ -119,6 +119,36 @@
                 </ValueStep>
 
             </Slider>
+
+            <!-- SEARCH BOX -->
+
+            <EditBox name="TravelersRecallSearchBox"
+                     inherits="InputBoxTemplate"
+                     autoFocus="false">
+
+                <Size>
+                    <AbsDimension x="220" y="20"/>
+                </Size>
+
+                <Anchors>
+
+                    <Anchor point="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="48"/>
+                        </Offset>
+                    </Anchor>
+
+                </Anchors>
+
+                <Scripts>
+
+                    <OnEscapePressed>
+                        this:ClearFocus();
+                    </OnEscapePressed>
+
+                </Scripts>
+
+            </EditBox>
 
         </Frames>
 
