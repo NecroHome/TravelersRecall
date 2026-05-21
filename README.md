@@ -14,3 +14,7 @@ Addon used by Traveler's Recall Module: ```text https://github.com/NecroHome/mod
 
 ## Author
 NecroHome ( LesmaSamuray )
+
+Changelog
+
+20/05/2026 - Added searchbar and fixed /reload claring discoved locations.
