@@ -1,9 +1,8 @@
 --------------------------------------------------
--- DATA
+-- SEARCH
 --------------------------------------------------
 
-TravelersRecall = {}
-TravelersRecall.Unlocked = {}
+local searchText = ""
 
 --------------------------------------------------
 -- SILENT MESSAGE FILTER
@@ -30,6 +29,10 @@ local function ToggleTravelersRecall()
         TravelersRecallFrame:Hide()
     else
         TravelersRecallFrame:Show()
+        local editBox = ChatEdit_ChooseBoxForSend()
+        editBox:SetText(".tr list")
+        ChatEdit_SendText(editBox)
+        editBox:SetText("")
     end
 
 end
@@ -229,6 +232,23 @@ TravelersRecallScrollFrame:SetScript(
 
 local buttons = {}
 
+local function MatchesSearch(name)
+
+    if searchText == "" then
+        return true
+    end
+
+    name = string.lower(name)
+
+    return string.find(
+        name,
+        searchText,
+        1,
+        true
+    ) ~= nil
+
+end
+
 local function RefreshLocations()
 
     for _, button in ipairs(buttons) do
@@ -237,85 +257,101 @@ local function RefreshLocations()
 
     end
 
-    wipe(buttons)
+    local visibleIndex = 0
 
-    local index = 0
-
-    for id, data in pairs(TravelersRecall.Unlocked) do
-
-        index = index + 1
+    for id, data in pairs(TravelersRecallDB.unlocked) do
 
         local name = data.name
         local iconPath = data.icon
 
-        local button = CreateFrame(
-            "Button",
-            "TravelersRecallButton"..id,
-            content,
-            "UIPanelButtonTemplate"
-        )
+        if MatchesSearch(name) then
 
-        button:SetWidth(190)
-        button:SetHeight(24)
+            visibleIndex = visibleIndex + 1
 
-        button:SetPoint(
-            "TOPLEFT",
-            content,
-            "TOPLEFT",
-            30,
-            -((index - 1) * 26)
-        )
+            local button = buttons[visibleIndex]
 
-        button:SetText(name)
+            --------------------------------------------------
+            -- CREATE BUTTON
+            --------------------------------------------------
 
-        --------------------------------------------------
-        -- CLICK
-        --------------------------------------------------
+            if not button then
 
-        button:SetScript("OnClick", function()
+                button = CreateFrame(
+                    "Button",
+                    nil,
+                    content,
+                    "UIPanelButtonTemplate"
+                )
 
-            local editBox =
-                ChatEdit_ChooseBoxForSend()
+                button:SetWidth(190)
+                button:SetHeight(24)
 
-            editBox:SetText(
-                ".tr teleport "..id
+                --------------------------------------------------
+                -- ICON
+                --------------------------------------------------
+
+                button.icon = button:CreateTexture(
+                    nil,
+                    "ARTWORK"
+                )
+
+                button.icon:SetWidth(16)
+                button.icon:SetHeight(16)
+
+                button.icon:SetPoint(
+                    "RIGHT",
+                    button,
+                    "LEFT",
+                    -4,
+                    0
+                )
+
+                buttons[visibleIndex] = button
+
+            end
+
+            --------------------------------------------------
+            -- POSITION
+            --------------------------------------------------
+
+            button:SetPoint(
+                "TOPLEFT",
+                content,
+                "TOPLEFT",
+                30,
+                -((visibleIndex - 1) * 26)
             )
 
-            ChatEdit_SendText(editBox)
+            --------------------------------------------------
+            -- DATA
+            --------------------------------------------------
 
-            editBox:SetText("")
+            button:SetText(name)
 
-        end)
+            button.icon:SetTexture(iconPath)
 
-        --------------------------------------------------
-        -- ICON
-        --------------------------------------------------
+            --------------------------------------------------
+            -- CLICK
+            --------------------------------------------------
 
-        local icon = button:CreateTexture(
-            nil,
-            "ARTWORK"
-        )
+            button:SetScript("OnClick", function()
 
-        icon:SetWidth(16)
-        icon:SetHeight(16)
+                local editBox =
+                    ChatEdit_ChooseBoxForSend()
 
-        icon:SetTexture(iconPath)
+                editBox:SetText(
+                    ".tr teleport "..id
+                )
 
-        icon:SetPoint(
-            "RIGHT",
-            button,
-            "LEFT",
-            -4,
-            0
-        )
+                ChatEdit_SendText(editBox)
 
-        button:SetScript("OnLeave", function()
+                editBox:SetText("")
 
-            GameTooltip:Hide()
+            end)
 
-        end)
+            button:Show()
 
-        table.insert(buttons, button)
+        end
 
     end
 
@@ -323,14 +359,14 @@ local function RefreshLocations()
     -- CONTENT HEIGHT
     --------------------------------------------------
 
-    content:SetHeight(index * 26)
+    content:SetHeight(visibleIndex * 26)
 
     --------------------------------------------------
     -- SCROLLBAR UPDATE
     --------------------------------------------------
 
     local maxScroll =
-        math.max(0, (index * 26) - 420)
+        math.max(0, (visibleIndex * 26) - 370)
 
     TravelersRecallScrollBar:SetMinMaxValues(
         0,
@@ -340,74 +376,89 @@ local function RefreshLocations()
 end
 
 --------------------------------------------------
+-- SEARCH BOX
+--------------------------------------------------
+
+TravelersRecallSearchBox:SetText("")
+
+TravelersRecallSearchBox:SetScript(
+    "OnTextChanged",
+    function()
+
+        searchText = string.lower(
+            this:GetText() or ""
+        )
+
+        RefreshLocations()
+
+    end
+)
+
+--------------------------------------------------
 -- EVENTS
 --------------------------------------------------
 
 local eventFrame = CreateFrame("Frame")
 
 eventFrame:RegisterEvent("CHAT_MSG_SYSTEM")
+eventFrame:RegisterEvent("ADDON_LOADED")
 
 eventFrame:SetScript(
     "OnEvent",
-    function(_, _, message)
+    function(_, event, message)
+        if event == "CHAT_MSG_SYSTEM" then
 
-        --------------------------------------------------
-        -- LOGIN SYNC
-        --------------------------------------------------
+            --------------------------------------------------
+            -- LIST SYNC
+            --------------------------------------------------
 
-        if string.find(message, "TR_LIST:") then
+            if string.find(message, "TR_LIST:") then
 
-            local _, _, id, name, icon =
-                string.find(
-                    message,
-                    "TR_LIST:(%d+):([^:]+):(.+)"
-                )
+                local _, _, id, name, icon =
+                    string.find(
+                        message,
+                        "TR_LIST:(%d+):([^:]+):(.+)"
+                    )
 
-            TravelersRecall.Unlocked[
-                tonumber(id)
-            ] =
-            {
-                name = name,
-                icon = icon
-            }
+                TravelersRecallDB.unlocked[
+                    tonumber(id)
+                ] =
+                {
+                    name = name,
+                    icon = icon
+                }
 
-            RefreshLocations()
+                RefreshLocations()
 
-            return
+                return
 
+            end
+
+            --------------------------------------------------
+            -- NEW UNLOCK
+            --------------------------------------------------
+
+            if string.find(message, "TR_UNLOCK:") then
+
+                local _, _, id, name, icon =
+                    string.find(
+                        message,
+                        "TR_UNLOCK:(%d+):([^:]+):(.+)"
+                    )
+
+                TravelersRecallDB.unlocked[
+                    tonumber(id)
+                ] = 
+                {
+                    name = name,
+                    icon = icon
+                }
+
+                RefreshLocations()
+
+                return
+
+            end
         end
-
-        --------------------------------------------------
-        -- NEW UNLOCK
-        --------------------------------------------------
-
-        if string.find(message, "TR_UNLOCK:") then
-
-            local _, _, id, name, icon =
-                string.find(
-                    message,
-                    "TR_UNLOCK:(%d+):([^:]+):(.+)"
-                )
-
-            TravelersRecall.Unlocked[
-                tonumber(id)
-            ] =
-            {
-                name = name,
-                icon = icon
-            }
-
-            DEFAULT_CHAT_FRAME:AddMessage(
-                "|cff00ff00Traveler's Recall:|r "
-                .."New location unlocked: "
-                ..name
-            )
-
-            RefreshLocations()
-
-            return
-
-        end
-
     end
 )
