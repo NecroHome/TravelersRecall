@@ -1,3 +1,6 @@
+
+TravelersRecallDB = TravelersRecallDB or { unlocked = {} }
+
 --------------------------------------------------
 -- SEARCH
 --------------------------------------------------
@@ -413,6 +416,8 @@ eventFrame:SetScript(
             --------------------------------------------------
 
             if string.find(message, "TR_LIST:") then
+
+                TravelersRecallDB = { unlocked = {} }
 
                 local _, _, id, name, icon =
                     string.find(
