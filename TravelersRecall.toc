@@ -3,7 +3,6 @@
 ## Notes: Fast travel system
 ## Author: NecroHome
 ## Version: 1.0
-## SavedVariables: TravelersRecallDB
 
 TravelersRecall.xml
 TravelersRecall.lua
