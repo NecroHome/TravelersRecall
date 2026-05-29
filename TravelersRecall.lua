@@ -1,5 +1,5 @@
 
-TravelersRecallDB = TravelersRecallDB or { unlocked = {} }
+TravelersRecall = TravelersRecall or { unlocked = {} }
 
 --------------------------------------------------
 -- SEARCH
@@ -31,6 +31,7 @@ local function ToggleTravelersRecall()
     if TravelersRecallFrame:IsShown() then
         TravelersRecallFrame:Hide()
     else
+        TravelersRecallDB = { unlocked = {} }
         TravelersRecallFrame:Show()
         local editBox = ChatEdit_ChooseBoxForSend()
         editBox:SetText(".tr list")
@@ -262,7 +263,7 @@ local function RefreshLocations()
 
     local visibleIndex = 0
 
-    for id, data in pairs(TravelersRecallDB.unlocked) do
+    for id, data in pairs(TravelersRecall.unlocked) do
 
         local name = data.name
         local iconPath = data.icon
@@ -425,7 +426,7 @@ eventFrame:SetScript(
                         "TR_LIST:(%d+):([^:]+):(.+)"
                     )
 
-                TravelersRecallDB.unlocked[
+                TravelersRecall.unlocked[
                     tonumber(id)
                 ] =
                 {
@@ -451,7 +452,7 @@ eventFrame:SetScript(
                         "TR_UNLOCK:(%d+):([^:]+):(.+)"
                     )
 
-                TravelersRecallDB.unlocked[
+                TravelersRecall.unlocked[
                     tonumber(id)
                 ] = 
                 {
