@@ -1,5 +1,6 @@
 
-TravelersRecall = TravelersRecall or { unlocked = {} }
+TravelersRecall = TravelersRecall or {}
+TravelersRecall.unlocked = TravelersRecall.unlocked or {}
 
 --------------------------------------------------
 -- SEARCH
@@ -31,7 +32,6 @@ local function ToggleTravelersRecall()
     if TravelersRecallFrame:IsShown() then
         TravelersRecallFrame:Hide()
     else
-        TravelersRecallDB = { unlocked = {} }
         TravelersRecallFrame:Show()
         local editBox = ChatEdit_ChooseBoxForSend()
         editBox:SetText(".tr list")
@@ -253,6 +253,25 @@ local function MatchesSearch(name)
 
 end
 
+local function SplitLastColon(rest)
+
+    local lastColon = 0
+
+    for i = 1, string.len(rest) do
+        if string.sub(rest, i, i) == ":" then
+            lastColon = i
+        end
+    end
+
+    if lastColon == 0 then
+        return nil, nil
+    end
+
+    return string.sub(rest, 1, lastColon - 1),
+        string.sub(rest, lastColon + 1)
+
+end
+
 local function RefreshLocations()
 
     for _, button in ipairs(buttons) do
@@ -418,49 +437,95 @@ eventFrame:SetScript(
 
             if string.find(message, "TR_LIST:") then
 
-                TravelersRecallDB = { unlocked = {} }
-
-                local _, _, id, name, icon =
+                local _, _, id, rest =
                     string.find(
                         message,
-                        "TR_LIST:(%d+):([^:]+):(.+)"
+                        "TR_LIST:(%d+):(.*)"
                     )
 
-                TravelersRecall.unlocked[
-                    tonumber(id)
-                ] =
-                {
-                    name = name,
-                    icon = icon
-                }
+                if id and rest then
+                    local name, icon = SplitLastColon(rest)
 
-                RefreshLocations()
+                    if name and icon then
+                        TravelersRecall.unlocked[
+                            tonumber(id)
+                        ] =
+                        {
+                            name = name,
+                            icon = icon
+                        }
+
+                        if TravelersRecallFrame:IsShown() then
+                            RefreshLocations()
+                        end
+                    end
+                end
 
                 return
 
             end
 
             --------------------------------------------------
-            -- NEW UNLOCK
+            -- LEARN/UNLOCK
             --------------------------------------------------
 
-            if string.find(message, "TR_UNLOCK:") then
+            if string.find(message, "TR_UNLOCK:") or
+                string.find(message, "TR_LEARN:") then
 
-                local _, _, id, name, icon =
+                local prefix = "TR_UNLOCK:"
+                if string.find(message, "TR_LEARN:") then
+                    prefix = "TR_LEARN:"
+                end
+
+                local _, _, id, rest =
                     string.find(
                         message,
-                        "TR_UNLOCK:(%d+):([^:]+):(.+)"
+                        prefix .. "(%d+):(.*)"
                     )
 
-                TravelersRecall.unlocked[
-                    tonumber(id)
-                ] = 
-                {
-                    name = name,
-                    icon = icon
-                }
+                if id and rest then
+                    local name, icon = SplitLastColon(rest)
 
-                RefreshLocations()
+                    if name and icon then
+                        TravelersRecall.unlocked[
+                            tonumber(id)
+                        ] =
+                        {
+                            name = name,
+                            icon = icon
+                        }
+
+                        if TravelersRecallFrame:IsShown() then
+                            RefreshLocations()
+                        end
+                    end
+                end
+
+                return
+
+            end
+
+            --------------------------------------------------
+            -- REMOVE
+            --------------------------------------------------
+
+            if string.find(message, "TR_REMOVE:") then
+
+                local _, _, id =
+                    string.find(
+                        message,
+                        "TR_REMOVE:(%d+)"
+                    )
+
+                if id then
+                    TravelersRecall.unlocked[
+                        tonumber(id)
+                    ] = nil
+
+                    if TravelersRecallFrame:IsShown() then
+                        RefreshLocations()
+                    end
+                end
 
                 return
 
